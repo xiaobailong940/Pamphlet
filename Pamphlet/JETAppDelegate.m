@@ -7,14 +7,56 @@
 //
 
 #import "JETAppDelegate.h"
-
+#import "MMDrawerController.h"
+#import "MMExampleDrawerVisualStateManager.h"
+#import "JETLeftViewController.h"
+#import "JETCenterViewController.h"
 @implementation JETAppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+    
+    UIViewController * leftSideDrawerViewController = [[JETLeftViewController alloc] init];
+    
+    UIViewController * centerViewController = [[JETCenterViewController alloc] init];
+    centerViewController.title = @"Jetsen";
+    
+    UINavigationController * navigationController = [[UINavigationController alloc] initWithRootViewController:centerViewController];
+    
+    MMDrawerController * drawerController = [[MMDrawerController alloc]
+                                             initWithCenterViewController:navigationController
+                                             leftDrawerViewController:leftSideDrawerViewController
+                                             ];
+    
+    [drawerController setOpenDrawerGestureModeMask:MMOpenDrawerGestureModeAll];
+    [drawerController setCloseDrawerGestureModeMask:MMCloseDrawerGestureModeAll];
+    
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone)
+    {
+        [drawerController setMaximumLeftDrawerWidth:200.0];
+    }
+    else
+    {
+        [drawerController setMaximumLeftDrawerWidth:400.0];
+    }
+    
+    
+    [drawerController
+     setDrawerVisualStateBlock:^(MMDrawerController *drawerController, MMDrawerSide drawerSide, CGFloat percentVisible) {
+         MMDrawerControllerDrawerVisualStateBlock block;
+         block = [[MMExampleDrawerVisualStateManager sharedManager]
+                  drawerVisualStateBlockForDrawerSide:drawerSide];
+         [[MMExampleDrawerVisualStateManager sharedManager] setLeftDrawerAnimationType:MMDrawerAnimationTypeSlide];
+         if(block){
+             block(drawerController, drawerSide, percentVisible);
+         }
+     }];
+    
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     // Override point for customization after application launch.
     self.window.backgroundColor = [UIColor whiteColor];
+    
+    [self.window setRootViewController:drawerController];
     [self.window makeKeyAndVisible];
     return YES;
 }
